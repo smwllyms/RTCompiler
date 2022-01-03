@@ -27,10 +27,10 @@ namespace RTCompiler.src.classes
             this.right = right;
             this.operation = operation;
         }
-        override public Term Evaluate()
+        override public Term Evaluate(Dictionary<string, Term> context)
         {
-            object l = left.Evaluate().result;
-            object r = right.Evaluate().result;
+            object l = left.Evaluate(context).result;
+            object r = right.Evaluate(context).result;
             // Type will bubble
             string lType = left.type;
             string rType = right.type;

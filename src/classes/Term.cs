@@ -17,8 +17,14 @@ namespace RTCompiler.src.classes
         {
             result = 0;
         }
-        virtual public Term Evaluate()
+        virtual public Term Evaluate(Dictionary<string, Term> context)
         {
+            if (type.Equals("var"))
+            {
+                Term var = null;
+                context.TryGetValue((string)result, out var);
+                return var;
+            }
             return this;
         }
     }
