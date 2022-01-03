@@ -29,11 +29,14 @@ namespace RTCompiler.src.classes
         }
         override public Term Evaluate(Dictionary<string, Term> context)
         {
-            object l = left.Evaluate(context).result;
-            object r = right.Evaluate(context).result;
+            Term lEval = left.Evaluate(context);
+            Term rEval = right.Evaluate(context);
+            object l = lEval.result;
+            object r = rEval.result;
             // Type will bubble
-            string lType = left.type;
-            string rType = right.type;
+            string lType = lEval.type;
+            string rType = rEval.type;
+
             bool typesEqual = (lType.Equals(rType));
             string determinedType = DetermineType(lType, rType, typesEqual);
             this.type = determinedType;

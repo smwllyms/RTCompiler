@@ -23,6 +23,9 @@ namespace RTCompiler.src.classes
             {
                 Term var = null;
                 context.TryGetValue((string)result, out var);
+                if (var == null)
+                    throw new RTCUndefinedReferenceException("variable '"
+                        + result + "' does not exist in the current context.");
                 return var;
             }
             return this;
