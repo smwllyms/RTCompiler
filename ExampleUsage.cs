@@ -17,7 +17,7 @@ namespace RTCompiler.src.classes
             // Compile p
             p.Compile();
             // Execute with an arg
-            p.Execute(new Argument[] { new Argument("d", new Term(5, "int")) });
+            p.Execute(new Argument[] { new Argument("d", new Term(7, "int")) });
 
             // Return the value from context
             if (RTCType.rtc_void != p.resultType)

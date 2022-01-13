@@ -133,6 +133,11 @@ namespace RTCompiler.src.classes
         }
         public void Execute(Argument[] args)
         {
+            // Add argument
+            foreach (Argument arg in args) {
+                baseContext.Add(arg);
+            }
+
             for (int i = 0; i < commands.Count; i++)
             {
                 commands[i].Execute(baseContext);

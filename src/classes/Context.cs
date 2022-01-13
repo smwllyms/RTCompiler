@@ -33,6 +33,10 @@ namespace RTCompiler.src.classes
         {
             variables.Add(varName, term);
         }
+        public void Add(Argument arg)
+        {
+            variables.Add(arg.name, arg.term);
+        }
         public void Dump()
         {
             Console.WriteLine("--------- Context Dump ---------");
