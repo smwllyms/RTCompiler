@@ -1,4 +1,5 @@
 ﻿int a = 5 - 2 - 3;
 int b = 5 - (2 - 3);
 a = 5 - 2 * b;
- int c= a + b;
+int c = a + b;
+ return a;

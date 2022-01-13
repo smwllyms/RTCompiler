@@ -57,4 +57,22 @@ namespace RTCompiler.src.classes
         {
         }
     }
+    // For run time errors during execution
+    class RTCRuntimeException : RTCException
+    {
+        private const string BASE = "Runtime Exception: ";
+        public RTCRuntimeException()
+        {
+        }
+
+        public RTCRuntimeException(string message)
+            : base(BASE + message)
+        {
+        }
+
+        public RTCRuntimeException(string message, Exception inner)
+            : base(BASE + message, inner)
+        {
+        }
+    }
 }

@@ -11,10 +11,6 @@ namespace RTCompiler.src.classes
         {
             '+', '-', '*', '/'
         };
-        public static string[] validTypes =
-        {
-            "var", "int", "float", "double", "string", "char"
-        };
         public static int TOP_PRIORITY = 1;
         public Term left;
         public Term right;
@@ -22,27 +18,27 @@ namespace RTCompiler.src.classes
         public Expression(Term left, Term right, char operation)
         {
             result = 0;
-            type = "expression";
+            type = RTCType.rtc_expression;
             this.left = left;
             this.right = right;
             this.operation = operation;
         }
-        override public Term Evaluate(Dictionary<string, Term> context)
+        override public Term Evaluate(Context context)
         {
             Term lEval = left.Evaluate(context);
             Term rEval = right.Evaluate(context);
             object l = lEval.result;
             object r = rEval.result;
             // Type will bubble
-            string lType = lEval.type;
-            string rType = rEval.type;
+            RTCType lType = lEval.type;
+            RTCType rType = rEval.type;
 
             bool typesEqual = (lType.Equals(rType));
-            string determinedType = DetermineType(lType, rType, typesEqual);
+            RTCType determinedType = DetermineType(lType, rType, typesEqual);
             this.type = determinedType;
             switch (determinedType)
             {
-                case "int":
+                case RTCType.rtc_int:
                     int lInt = int.Parse(l.ToString());
                     int rInt = int.Parse(r.ToString());
                     switch (operation)
@@ -64,7 +60,7 @@ namespace RTCompiler.src.classes
                             break;
                     }
                     break;
-                case "float":
+                case RTCType.rtc_float:
                     float lFloat = float.Parse(l.ToString());
                     float rFloat = float.Parse(r.ToString());
                     switch (operation)
@@ -86,7 +82,7 @@ namespace RTCompiler.src.classes
                             break;
                     }
                     break;
-                case "double":
+                case RTCType.rtc_double:
                     double lDouble = double.Parse(l.ToString());
                     double rDouble = double.Parse(r.ToString());
                     switch (operation)
@@ -114,7 +110,11 @@ namespace RTCompiler.src.classes
             }
             return this;
         }
-        public static Term Parse(string expression)
+        public static Term ParseAndCreate(string expression)
+        {
+            return TryCreate(expression);
+        }
+        public static string Parse(string expression)
         {
             // Ensure we don't have any screwy chars
             expression = Regex.Replace(expression, @"[\s\t\r\n]*", "");
@@ -256,8 +256,7 @@ namespace RTCompiler.src.classes
             }
             // Remove the extra parentheses we added originally
             expression = expression.Remove(0, 1).Remove(expression.Length - 2, 1);
-            Console.WriteLine("Updated expression: " + expression);
-            return TryCreate(expression);
+            return expression;
         }
         public static Term TryCreate(string expression)
         {
@@ -303,7 +302,7 @@ namespace RTCompiler.src.classes
                 }
             }
             // Guess the type
-            string type = "var";
+            RTCType type = RTCType.rtc_var;
             object value = expression;
             bool isNumber = char.IsDigit(expression[0]);
             bool isString = (expression[0] == '\"');
@@ -314,55 +313,59 @@ namespace RTCompiler.src.classes
             {
                 if (isFloat)
                 {
-                    type = "float";
+                    type = RTCType.rtc_float;
                     value = float.Parse(expression.Trim('f'));
                 }
                 else if (hasDecimal)
                 {
-                    type = "double";
+                    type = RTCType.rtc_double;
                     // just incase there is a d
                     value = double.Parse(expression.Trim('d'));
                 }
                 else
                 {
-                    type = "int";
+                    type = RTCType.rtc_int;
                     value = int.Parse(expression);
                 }
             }
             else if (isString)
             {
-                type = "string";
+                type = RTCType.rtc_string;
                 value = expression.Trim('\"');
             }
             else if (isChar)
             {
-                type = "char";
+                type = RTCType.rtc_char;
                 value = expression.Trim('\'');
             }
             return new Term(value, type);
         }
 
-        private static string DetermineType(string l, string r, bool equal)
+        private static RTCType DetermineType(RTCType l, RTCType r, bool equal)
         {
             if (equal)
             {
-                foreach (string type in validTypes)
+                foreach (RTCType type in Enum.GetValues(typeof(RTCType)))
                 {
-                    if (type.Equals(l)) return type;
+                    if (type == l) return type;
                 }
-                return "var";
+                return RTCType.rtc_var;
             }
-            string types = l + r;
+            RTCType[] types = { l, r };
             // Implementation choice -> treat op with char as string
-            bool hasString = types.Contains("string") || types.Contains("char");
-            bool hasDouble = types.Contains("double");
-            bool hasInt = types.Contains("int");
-            bool hasFloat = types.Contains("float");
-            if (hasString) return "string";
-            if (hasDouble) return "double";
-            if (hasFloat) return "float";
-            if (hasInt) return "int";
-            return "var";
+            bool hasString = hasType(types, RTCType.rtc_string) || hasType(types, RTCType.rtc_char);
+            bool hasDouble = hasType(types, RTCType.rtc_double);
+            bool hasInt = hasType(types, RTCType.rtc_int);
+            bool hasFloat = hasType(types, RTCType.rtc_float);
+            if (hasString) return RTCType.rtc_string;
+            if (hasDouble) return RTCType.rtc_double;
+            if (hasFloat) return RTCType.rtc_float;
+            if (hasInt) return RTCType.rtc_int;
+            return RTCType.rtc_var;
+        }
+        private static bool hasType(RTCType[] types, RTCType type)
+        {
+            return (types[0] == type || types[1] == type);
         }
         private static int GetOperationPriority(char op)
         {
